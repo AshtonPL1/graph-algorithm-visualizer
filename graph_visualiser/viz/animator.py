@@ -59,7 +59,6 @@ class GraphAnimator:
             self.pos = nx.spring_layout(G, seed=42)
 
         # Adaptive scaling based on number of vertices
-        # Адаптивное масштабирование в зависимости от числа вершин
         n = len(G.nodes)
         if n > 100:
             self.marker_size = VERTEX_MARKER_SIZE / 3
@@ -82,13 +81,10 @@ class GraphAnimator:
 
         # Create figure
         self.fig = plt.figure(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT), dpi=WINDOW_DPI)
-        self.fig.subplots_adjust(top=0.85, bottom=0.15)
+        self.fig.subplots_adjust(top=0.85, bottom=0.15, right=0.75)  # right margin for legend
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.set_aspect('equal')
         self.ax.axis('off')
-
-        # Legend patches (will be drawn once or per frame – better on first frame)
-        self._legend_drawn = False
 
         self._setup_widgets()
         self._connect_keyboard()
@@ -141,18 +137,18 @@ class GraphAnimator:
             self.fig.canvas.draw_idle()
 
     def _draw_legend(self):
-        """Draw legend explaining colors and styles (only once)."""
+        """Draw legend outside the plot area to avoid overlapping the graph."""
         legend_elements = [
             Patch(facecolor=VERTEX_DEFAULT, edgecolor='black', label='Unvisited'),
             Patch(facecolor=VERTEX_VISITED, edgecolor='black', label='Visited'),
             Patch(facecolor=VERTEX_CURRENT, edgecolor='black', label='Current'),
             Patch(facecolor=VERTEX_PATH, edgecolor='black', label='Path vertex'),
             plt.Line2D([0], [0], color=EDGE_PATH, linewidth=EDGE_PATH_WIDTH, label='Final path edge'),
-            plt.Line2D([0], [0], color=EDGE_RELAX, linewidth=EDGE_RELAX_WIDTH, linestyle='--', label='Relaxation (no improve)'),
-            plt.Line2D([0], [0], color=EDGE_RELAX_IMPROVED, linewidth=EDGE_RELAX_IMPROVED_WIDTH, label='Relaxation (improved)'),
+            plt.Line2D([0], [0], color=EDGE_RELAX, linewidth=EDGE_RELAX_WIDTH, linestyle='--', label='Relax (no improve)'),
+            plt.Line2D([0], [0], color=EDGE_RELAX_IMPROVED, linewidth=EDGE_RELAX_IMPROVED_WIDTH, label='Relax (improved)'),
             plt.Line2D([0], [0], color=EDGE_DEFAULT, linewidth=EDGE_DEFAULT_WIDTH, label='Default edge'),
         ]
-        self.ax.legend(handles=legend_elements, loc='upper left', fontsize=8, framealpha=0.7)
+        self.ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1.02, 1), fontsize=8, framealpha=0.7, borderaxespad=0.)
 
     def _draw_frame(self, state: AlgorithmState, frame_idx: int):
         self.ax.clear()
@@ -161,12 +157,8 @@ class GraphAnimator:
         title = f"Graph Algorithm Visualizer — {self.algo_name} (Step {frame_idx+1}/{len(self.states)})"
         self.ax.set_title(title, fontsize=14, pad=60)
 
-        # Draw legend once
-        if not self._legend_drawn:
-            self._draw_legend()
-            self._legend_drawn = True  # unfortunately clear() removes legend, so we redraw every frame.
-            # Actually clear() clears everything, so legend must be redrawn. We'll redraw each frame.
-        self._draw_legend()  # redraw after clear
+        # Draw legend (redrawn after clear)
+        self._draw_legend()
 
         # Determine final path edge set
         final_path_edges = set()
@@ -176,7 +168,6 @@ class GraphAnimator:
                 u, v = path[i], path[i+1]
                 final_path_edges.add(frozenset((u, v)))
 
-        # Scale edge widths by factor
         ew_default = EDGE_DEFAULT_WIDTH * self.edge_width_factor
         ew_relax = EDGE_RELAX_WIDTH * self.edge_width_factor
         ew_path = EDGE_PATH_WIDTH * self.edge_width_factor
@@ -208,7 +199,6 @@ class GraphAnimator:
                 color=color, linewidth=width, linestyle=style, alpha=0.8, zorder=1
             )
 
-            # Edge weight label (scale font)
             mid_x = (p1[0] + p2[0]) / 2
             mid_y = (p1[1] + p2[1]) / 2
             weight = edge_data.get('weight', 0.0)
@@ -220,7 +210,6 @@ class GraphAnimator:
                 zorder=3
             )
 
-        # Draw vertices
         for v in self.G.nodes:
             x, y = self.pos[v]
             if state.final_path and v in state.final_path:
@@ -237,13 +226,11 @@ class GraphAnimator:
                 linewidth=1.5, zorder=2
             )
 
-            # ID label
             self.ax.text(
                 x, y + self.label_offset, str(v),
                 fontsize=self.font_id, ha='center', va='bottom', fontweight='bold', zorder=4
             )
 
-            # Distance label
             d = state.dist.get(v, float('inf'))
             d_str = f"{d:.2f}" if d != float('inf') else "∞"
 
@@ -263,7 +250,6 @@ class GraphAnimator:
                 fontsize=self.font_dist, ha='center', va='top', color=dist_color, zorder=4
             )
 
-        # Auto-fit axes with padding
         xs = [p[0] for p in self.pos.values()]
         ys = [p[1] for p in self.pos.values()]
         if xs and ys:
@@ -329,7 +315,7 @@ class GraphAnimator:
             raise ValueError(f"Unsupported export format '{ext}'. Use .gif or .mp4.")
 
         fig, ax = plt.subplots(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT), dpi=EXPORT_DPI)
-        fig.subplots_adjust(top=0.85)
+        fig.subplots_adjust(top=0.85, right=0.75)   # match interactive layout
         ax.set_aspect('equal')
         ax.axis('off')
 
@@ -337,6 +323,12 @@ class GraphAnimator:
         export_animator.fig = fig
         export_animator.ax = ax
         export_animator.pos = self.pos
+        # Override scaling attributes to match original (important for large graphs)
+        export_animator.marker_size = self.marker_size
+        export_animator.font_id = self.font_id
+        export_animator.font_dist = self.font_dist
+        export_animator.label_offset = self.label_offset
+        export_animator.edge_width_factor = self.edge_width_factor
 
         def update_export(frame):
             ax.clear()
