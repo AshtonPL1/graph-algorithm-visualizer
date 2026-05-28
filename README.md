@@ -12,6 +12,12 @@
 - Save and load algorithm states in JSON format (replay without recomputation).
 - Complete test suite (22 tests) for core modules.
 
+## Demonstration
+
+Below is a demo of Dijkstra's algorithm on a 4x4 grid graph with diagonals (16 vertices, 42 edges). The shortest path from the top-left corner (A) to the bottom-right corner (P) is found and highlighted.
+
+![Demo animation](READMEPREVIEW.gif)
+
 ### Requirements:
 - Python 3.10 or higher
 - Dependencies: networkx >= 3.0, matplotlib >= 3.7, Pillow (optional)
@@ -112,6 +118,12 @@ graph-algorithm-visualizer/\
 - Экспорт анимации в GIF или MP4.
 - Сохранение и загрузка состояний в JSON.
 - 22 модульных теста.
+
+## Демонстрация
+
+Ниже демонстрация алгоритма Дейкстры на сетке 4x4 с диагоналями (16 вершин, 42 ребра). Найден и выделен кратчайший путь из левого верхнего угла (A) в правый нижний (P).
+
+![Демо анимация](READMEPREVIEW.gif)
 
 ### Требования:
 - Python 3.10 или выше
