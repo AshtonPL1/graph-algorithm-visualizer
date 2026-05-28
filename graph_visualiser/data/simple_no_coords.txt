@@ -1,0 +1,12 @@
+# Simple graph without coordinates
+VERTICES
+A
+B
+C
+D
+EDGES
+A B 10
+B C 5
+C D 12.5
+D A 7.2
+A C 15

@@ -1,0 +1,13 @@
+# Triangle with center
+VERTICES
+A 0 0
+B 200 0
+C 100 173.205
+D 100 57.735
+EDGES
+A B 10
+B C 10
+C A 10
+A D 5.77
+B D 5.77
+C D 5.77
