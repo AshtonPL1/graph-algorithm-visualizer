@@ -1,198 +1,338 @@
 # Graph Algorithm Visualizer (Dijkstra, A*)
 
-## Interactive desktop application for loading weighted undirected graphs, running Dijkstra's and A* algorithms with step-by-step animation, interactive playback control, and export of results.
-
-### Features:
-- Load graphs from text files (with or without vertex coordinates) or enter manually in console.
-- Two algorithms: classic [Dijkstra](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) and [A*](https://en.wikipedia.org/wiki/A*_search_algorithm) with Euclidean heuristic.
-- Step-by-step animation showing visited vertices, edge relaxation, distance label updates.
-- Interactive controls: Play/Pause, step forward/backward buttons and keyboard shortcuts.
-- Color legend and adaptive scaling for graphs of any size.
-- Export animation to GIF or MP4.
-- Save and load algorithm states in JSON format (replay without recomputation).
-- Complete test suite (22 tests) for core modules.
-
-## Demonstration
-
-Below is a demo of Dijkstra's algorithm on a 4x4 grid graph with diagonals (16 vertices, 42 edges). The shortest path from the top-left corner (A) to the bottom-right corner (P) is found and highlighted.
-
-![Demo animation](READMEPREVIEW.gif)
-
-### Requirements:
-- Python 3.10 or higher
-- Dependencies: networkx >= 3.0, matplotlib >= 3.7, Pillow (optional)
-- For MP4 export: ffmpeg
-
-### Installation and Usage:
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourname/graph-algorithm-visualizer.git
-2. Change directory:
-   ```
-   cd graph-algorithm-visualizer
-3. Install the requirements:
-   ```
-   pip install -r requirements.txt
-4. Run:
-   ```
-   python run.py --start A --end C --file graph_visualiser/data/sample_graph.txt --algo dijkstra --speed 300
-   or(!)
-   python -m graph_visualiser --start A --end C --file graph_visualiser/data/sample_graph.txt --algo dijkstra --speed 300
-
-### Controls:
-- Space: Play/Pause
-- Right/Left arrows: next/previous step
-- Esc: close window
-
-### Graph File Format:
-Sections VERTICES and EDGES. Vertex line: ID [X Y] (coordinates optional for Dijkstra).
-
-**Example with coordinates**:
-VERTICES
-
-A 0 0\
-B 200 0\
-...
-
-EDGES\
-A B 10\
-...
-
-*Comments (#) and blank lines ignored. Edge weights must be positive.*
-
-### Usage Examples:
-- A* with coordinates: python run.py --start A --end C --file graph_visualiser/data/sample_graph.txt --algo astar --speed 200
-- Save to GIF: python run.py ... --export animation.gif
-- Save states to JSON: python run.py ... --save-states states.json
-- Load states: python run.py --load-states states.json --file ... --algo dijkstra
-- Manual input: omit --file and follow prompts.
-
-### Detailed Usage:
-Launching the program opens a matplotlib window. The animation starts paused; click "Play" or press Space to begin automatic playback. Use the "Forward" and "Back" buttons or left/right arrow keys to manually step through the algorithm states. The graph display updates in real time:
-- Gray vertices are unvisited.
-- Teal vertices have been extracted from the priority queue (final distance determined).
-- The bright yellow vertex is currently being processed.
-- The dashed blue line indicates the edge currently being considered for relaxation.
-- If relaxation improves the distance, the edge turns solid orange-red and the distance label under the neighbor vertex turns green.
-- When the algorithm completes, the shortest path (if found) is highlighted with thick green edges and orange vertices. If no path exists, a red message appears.
-- The legend in the upper left explains all colors.
-For large graphs, markers and fonts automatically shrink to avoid clutter.
-Exporting to GIF requires Pillow; MP4 requires ffmpeg. When saving states to JSON, the current algorithm state sequence is stored and can be reloaded later with --load-states (the original graph file must still be provided for visualization).
-
-### Testing:
-pytest graph_visualiser/tests/\
-  or:\
-  python -m pytest graph_visualiser/tests/
-
-### Project Structure:
-graph-algorithm-visualizer/\
-├── run.py.\
-├── requirements.txt\
-├── README.txt\
-└── graph_visualiser/\
-    ├── __init__.py\
-    ├── __main__.py\
-    ├── main.py\
-    ├── config.py\
-    ├── core/\
-    ├── io/\
-    ├── viz/\
-    ├── utils/\
-    ├── data/\
-    └── tests/
-
-## License: [MIT](https://github.com/AshtonPL1/graph-algorithm-visualizer/blob/master/LICENSE).
+**An interactive desktop application for visualizing shortest path algorithms on weighted undirected graphs.**  
+Built with Python, NetworkX, and Matplotlib, this tool loads graphs from files or manual input, runs Dijkstra's or A* step by step, and displays the execution through an animated, interactive visualization. It supports playback controls, color-coded state representation, adaptive rendering, and export of both animations and algorithm states.
 
 ---
 
-# Визуализатор алгоритмов поиска кратчайшего пути (Дейкстра, A*)
+## Features
 
-## Интерактивное приложение для загрузки взвешенных неориентированных графов, запуска алгоритмов Дейкстры и A* с пошаговой анимацией, интерактивным управлением и экспортом результатов.
+- **Flexible graph input** – read a graph from a text file (with or without vertex coordinates) or enter it manually in the console.
+- **Two classic algorithms** – [Dijkstra](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) and [A\*](https://en.wikipedia.org/wiki/A*_search_algorithm) with Euclidean heuristic, implemented from scratch using step generators.
+- **Step‑by‑step animation** – every visited vertex, every relaxation attempt, and every distance update is shown as a distinct frame.
+- **Interactive playback** – Play/Pause, step forward/backward, and keyboard shortcuts give full control over the animation.
+- **Rich visual feedback** – vertices and edges change color according to their algorithmic state; a legend explains the meaning of each color.
+- **Adaptive scaling** – marker sizes, fonts, and offsets automatically adjust for graphs with dozens or hundreds of vertices.
+- **Export to GIF / MP4** – save the complete animation as a file for presentations or documentation.
+- **JSON state persistence** – export the entire sequence of algorithm states to JSON and replay it later without recomputing the shortest path.
+- **Comprehensive test suite** – 22 tests cover algorithm correctness, graph loading, state serialization, and visualization logic.
 
-### Возможности:
-- Загрузка графов из текстовых файлов (с координатами или без) или ручной ввод.
-- Алгоритмы [Дейкстры](https://ru.wikipedia.org/wiki/Алгоритм_Дейкстры) и [A*](https://ru.wikipedia.org/wiki/A*) с эвклидовой эвристикой.
-- Пошаговая анимация с подсветкой вершин, релаксации рёбер, изменением меток расстояний.
-- Кнопки Play/Pause, перемотка, клавиатурные сокращения.
-- Цветовая легенда и адаптивное масштабирование.
-- Экспорт анимации в GIF или MP4.
-- Сохранение и загрузка состояний в JSON.
-- 22 модульных теста.
+---
 
-## Демонстрация
+## Demonstration
 
-Ниже демонстрация алгоритма Дейкстры на сетке 4x4 с диагоналями (16 вершин, 42 ребра). Найден и выделен кратчайший путь из левого верхнего угла (A) в правый нижний (P).
+Below is a demo of Dijkstra's algorithm on a 4×4 grid graph with diagonals (16 vertices, 42 edges). The shortest path from the top‑left corner (A) to the bottom‑right corner (P) is found and highlighted.
 
-![Демо анимация](READMEPREVIEW.gif)
+![Demo animation](READMEPREVIEW.gif)
 
-### Требования:
-- Python 3.10 или выше
-- Зависимости: networkx, matplotlib, Pillow (опционально)
-- Для MP4: ffmpeg
+---
 
-### Установка и запуск:
-1. Клонирование репозитория:
+## Requirements
+
+- **Python** 3.10 or higher
+- **Python packages** (installed automatically via `requirements.txt`):
+  - `networkx >= 3.0`
+  - `matplotlib >= 3.7`
+  - `Pillow` (optional, required only for GIF export)
+- **External tools** (optional):
+  - `ffmpeg` (required only for MP4 export)
+
+---
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/AshtonPL1/graph-algorithm-visualizer.git
    ```
-   git clone https://github.com/yourname/graph-algorithm-visualizer.git
-2. Смените директорию:
-   ```
+2. Enter the project directory:
+   ```bash
    cd graph-algorithm-visualizer
-3. Установите зависимости:
    ```
+3. Install the dependencies:
+   ```bash
    pip install -r requirements.txt
-4. Запуск:
    ```
-   python run.py --start A --end C --file graph_visualiser/data/sample_graph.txt --algo dijkstra --speed 300
-   или(!)
-   python -m graph_visualiser --start A --end C --file graph_visualiser/data/sample_graph.txt --algo dijkstra --speed 300
 
-### Управление:
-- Пробел: Play/Pause
-- Стрелки вправо/влево: следующий/предыдущий шаг
-- Esc: закрыть окно
+---
 
-### Формат файла графа:
-*Секции VERTICES и EDGES. Вершины: ID [X Y] (координаты необязательны для Дейкстры). Комментарии # и пустые строки игнорируются. Веса рёбер положительные.*
+## Quick Start
 
-### Примеры:
-- A* с координатами: python run.py --start A --end C --file ... --algo astar --speed 200
-- Сохранение в GIF: python run.py ... --export animation.gif
-- Сохранение состояний в JSON: python run.py ... --save-states states.json
-- Загрузка состояний: python run.py --load-states states.json --file ... --algo dijkstra
-- Ручной ввод: не указывать --file, следовать инструкциям в консоли.
+Run the application with a sample graph provided in the repository:
 
-### Подробное использование:
-После запуска открывается окно matplotlib. Анимация изначально на паузе; нажмите "Play" или Пробел для автоматического воспроизведения. Кнопки "Forward"/"Back" и стрелки влево/вправо позволяют перемещаться по шагам вручную. Отображение графа обновляется в реальном времени:
-- Серые вершины — не посещённые.
-- Бирюзовые — извлечённые из очереди с приоритетом (окончательное расстояние определено).
-- Ярко-жёлтая вершина — текущая обрабатываемая.
-- Синяя пунктирная линия — ребро, рассматриваемое на данном шаге релаксации.
-- Если релаксация улучшает расстояние, ребро становится сплошным оранжево-красным, а метка расстояния под соседней вершиной зеленеет.
-- По завершении алгоритма кратчайший путь (если найден) выделяется толстыми зелёными линиями и оранжевыми вершинами. Если путь не существует, появляется красное сообщение.
-- Легенда в левом верхнем углу поясняет все цвета.
-Для больших графов маркеры и шрифты автоматически уменьшаются, чтобы избежать нагромождения.
-Экспорт в GIF требует Pillow; MP4 – ffmpeg. При сохранении состояний в JSON последовательность шагов алгоритма сохраняется и может быть позже загружена с помощью --load-states (для визуализации по-прежнему нужен исходный файл графа).
+```bash
+python run.py --start A --end C --file graph_visualiser/data/sample_graph.txt --algo dijkstra --speed 300
+```
 
-### Тестирование:
-pytest graph_visualiser/tests/\
-  или:\
-  python -m pytest graph_visualiser/tests/
+Or, using the package directly:
 
-### Структура проекта:
-graph-algorithm-visualizer/\
-├── run.py\
-├── requirements.txt\
-├── README.txt\
-└── graph_visualiser/\
-    ├── __init__.py\
-    ├── __main__.py\
-    ├── main.py\
-    ├── config.py\
-    ├── core/\
-    ├── io/\
-    ├── viz/\
-    ├── utils/\
-    ├── data/\
+```bash
+python -m graph_visualiser --start A --end C --file graph_visualiser/data/sample_graph.txt --algo dijkstra --speed 300
+```
+
+A matplotlib window will open, showing the graph with the algorithm ready to animate.
+
+---
+
+## Command-Line Arguments
+
+| Argument       | Required | Description |
+|----------------|----------|-------------|
+| `--start`      | Yes¹     | ID of the start vertex |
+| `--end`        | Yes¹     | ID of the target vertex |
+| `--file`       | No       | Path to a graph file. If omitted, manual console input is started |
+| `--algo`       | No       | Algorithm: `dijkstra` (default) or `astar` |
+| `--speed`      | No       | Delay between frames in milliseconds (default: 500) |
+| `--export`     | No       | Export animation to a file (`.gif` or `.mp4`) instead of showing the interactive window |
+| `--save-states`| No       | Save all algorithm states to a JSON file and exit |
+| `--load-states`| No       | Load algorithm states from a JSON file (requires `--file` and `--algo`) |
+
+¹ Not required when `--load-states` is used.
+
+---
+
+## Interactive Controls
+
+| Action          | Control |
+|-----------------|---------|
+| Play / Pause    | Click **Play** button or press <kbd>Space</kbd> |
+| Next step       | Click **Forward** button or press <kbd>→</kbd> |
+| Previous step   | Click **Back** button or press <kbd>←</kbd> |
+| Close window    | Press <kbd>Esc</kbd> |
+
+When you open the application, the animation starts paused so you can examine the initial state. Press **Play** to watch the algorithm unfold automatically, or step through manually.
+
+---
+
+## Graph File Format
+
+The input file is a plain text file with two sections: `VERTICES` and `EDGES`.
+
+- Lines starting with `#` are comments and are ignored.
+- Empty lines are also ignored.
+- Each vertex line can be:
+  - `ID X Y` (with coordinates, required for A\*)
+  - `ID` (without coordinates, only Dijkstra is allowed)
+- Each edge line is:
+  - `u v weight` (weight must be strictly positive)
+
+**Example with coordinates:**
+
+```
+VERTICES
+A 0 0
+B 200 0
+C 100 173.205
+D 100 57.735
+EDGES
+A B 10
+B C 10
+C A 10
+A D 5.77
+B D 5.77
+C D 5.77
+```
+
+If coordinates are omitted, the program automatically computes a spring‑layout for visualization, but A\* will be unavailable (raises an error).
+
+---
+
+## Algorithms in Detail
+
+Both algorithms are implemented as Python **generators** that yield an `AlgorithmState` object after every atomic operation: extracting a vertex from the priority queue or relaxing a single edge. This design makes it possible to pause and resume the execution at any point, forming the basis of the step‑by‑step animation.
+
+### Dijkstra
+- Maintains a distance dictionary (`dist`) initialized to infinity, except the start vertex (0).
+- Uses a min‑heap (`heapq`) to always process the vertex with the smallest known distance.
+- When a vertex is extracted, its neighbors are examined. If the distance through the current vertex is shorter, the distance and parent pointer are updated, and the neighbor is pushed onto the heap.
+- The algorithm continues until the target is extracted or the heap is empty.
+- **Lazy deletion**: outdated heap entries (when a vertex is added multiple times with different distances) are simply ignored when popped.
+
+### A\*
+- Extends Dijkstra by introducing a heuristic function `h(v)` – Euclidean distance from vertex `v` to the target.
+- The priority queue is ordered by `f(v) = g(v) + h(v)`, where `g(v)` is the distance from the start.
+- This heuristic guides the search towards the goal, often expanding fewer vertices.
+- The heuristic is **admissible** (never overestimates) and **consistent**, guaranteeing optimality.
+
+Both algorithms store the parent of each updated vertex, allowing the shortest path to be reconstructed by tracing back from the target to the start.
+
+---
+
+## Visual Representation
+
+The animation conveys algorithm progress through a consistent color scheme:
+
+| Element | Color | Meaning |
+|---------|-------|---------|
+| Vertex (default) | Gray | Unvisited |
+| Vertex (visited) | Teal | Extracted from priority queue, final distance known |
+| Vertex (current) | Bright yellow | Currently being processed |
+| Vertex (final path) | Orange | Belongs to the found shortest path |
+| Edge (default) | Gray | Normal edge |
+| Edge (relaxation) | Dashed blue | Currently under relaxation (no improvement) |
+| Edge (improvement) | Solid orange-red | Relaxation that improved the distance |
+| Edge (final path) | Thick green | Part of the shortest path |
+| Distance label | Dark gray / ∞ | Current known distance; turns **green** when improved |
+| “Path not found” | Red text | Displayed when no path exists |
+
+A **legend** is placed to the right of the graph, ensuring it never overlaps with the vertices.
+
+For larger graphs (more than 30 vertices), markers and text automatically shrink to keep the visualization readable.
+
+---
+
+## Export & State Persistence
+
+### Animation Export
+Use `--export` to save the entire step‑by‑step animation to a file:
+
+```bash
+python run.py --start A --end C --file graph_visualiser/data/grid_graph.txt --algo dijkstra --export demo.gif
+```
+
+Supported formats: `.gif` (requires Pillow) and `.mp4` (requires ffmpeg).
+
+### JSON State Export / Import
+The complete sequence of algorithm states can be saved to a JSON file:
+
+```bash
+python run.py --start A --end C --file graph_visualiser/data/sample_graph.txt --algo dijkstra --save-states states.json
+```
+
+Later, the animation can be replayed without recomputation:
+
+```bash
+python run.py --load-states states.json --file graph_visualiser/data/sample_graph.txt --algo dijkstra
+```
+
+The JSON file contains for each step:
+- visited set
+- distances (`g` values for A\*)
+- parent pointers
+- current vertex
+- relaxed edge (if any)
+- `f` values (A\* only)
+- final path
+- improvement flag and improved vertex
+
+Infinity is serialized as the string `"Infinity"`. Note that the original graph file is still required when loading states because the states do not store the graph topology.
+
+---
+
+## Project Architecture
+
+The application follows a modular design with clear separation of concerns.
+
+### Package structure
+
+```
+graph_visualiser/
+├── main.py          – CLI entry point, argument parsing, orchestration
+├── config.py        – Paths and global constants
+├── core/
+│   ├── state.py     – AlgorithmState dataclass
+│   ├── graph_core.py – GraphConfig wrapper around NetworkX graph
+│   └── algorithms.py – Dijkstra and A* step generators
+├── io/
+│   ├── graph_reader.py – File and manual graph input with validation
+│   ├── layout.py       – Automatic layout computation
+│   └── state_exporter.py – JSON serialization / deserialization
+├── viz/
+│   └── animator.py  – Interactive matplotlib window, drawing, export
+├── utils/
+│   ├── colors.py    – Color palette constants
+│   ├── settings.py  – Default parameters
+│   └── exceptions.py – Custom exception hierarchy
+├── data/            – Sample graph files
+└── tests/           – Unit tests
+```
+
+### Design highlights
+
+- **Generators for algorithm steps** – enables clean separation between computation and visualization. The main loop collects all states into a list only for the ability to step backward; in a memory-constrained scenario, states could be consumed lazily.
+- **Immutable state objects** – every yield creates a fresh `AlgorithmState` with copied dictionaries, preventing accidental mutation.
+- **Custom exception hierarchy** – file parsing errors, missing coordinates, and other issues are reported with precise messages and distinct exit codes.
+- **Headless testing** – visualization tests use the `Agg` backend of matplotlib, allowing rendering verification without a display.
+- **Adaptive rendering** – the `GraphAnimator` adjusts marker size, font size, and edge width based on the number of vertices.
+
+---
+
+## Testing
+
+The project includes 22 unit tests covering:
+
+- Algorithm correctness (Dijkstra and A\* on known graphs)
+- Handling of disconnected graphs and identical start/end
+- Graph file parsing (valid files, missing sections, duplicate vertices, loops, etc.)
+- State JSON serialization / deserialization (including roundtrip with infinity)
+- Animator drawing logic (headless, ensures no exceptions)
+
+Run the tests with:
+
+```bash
+pytest graph_visualiser/tests/
+```
+
+or
+
+```bash
+python -m pytest graph_visualiser/tests/
+```
+
+All tests should pass.
+
+---
+
+## Project Structure
+
+```
+graph-algorithm-visualizer/
+├── run.py
+├── requirements.txt
+├── README.md
+└── graph_visualiser/
+    ├── __init__.py
+    ├── __main__.py
+    ├── main.py
+    ├── config.py
+    ├── core/
+    │   ├── __init__.py
+    │   ├── algorithms.py
+    │   ├── graph_core.py
+    │   └── state.py
+    ├── io/
+    │   ├── __init__.py
+    │   ├── graph_reader.py
+    │   ├── layout.py
+    │   └── state_exporter.py
+    ├── viz/
+    │   ├── __init__.py
+    │   └── animator.py
+    ├── utils/
+    │   ├── __init__.py
+    │   ├── colors.py
+    │   ├── exceptions.py
+    │   └── settings.py
+    ├── data/
+    │   ├── sample_graph.txt
+    │   └── grid_graph.txt
     └── tests/
+        ├── __init__.py
+        ├── core/
+        │   ├── __init__.py
+        │   ├── test_algorithms.py
+        │   └── test_state.py
+        ├── io/
+        │   ├── __init__.py
+        │   ├── test_graph_reader.py
+        │   └── test_state_exporter.py
+        └── viz/
+            ├── __init__.py
+            └── test_animator.py
+```
 
-## Лицензия: [MIT](https://github.com/AshtonPL1/graph-algorithm-visualizer/blob/master/LICENSE).
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
