@@ -335,4 +335,12 @@ graph-algorithm-visualizer/
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License. See [LICENSE](https://github.com/AshtonPL1/graph-algorithm-visualizer/blob/master/LICENSE) for details.
+
+## Contact
+
+Author: **Borovoy Nikita**  
+Email: nurmag00@bk.ru  
+GitHub: [AshtonPL1](https://github.com/AshtonPL1)
+
+---
